@@ -1,11 +1,10 @@
-[gd_scene load_steps=10 format=4 uid="uid://cuoragdsy6aol"]
+[gd_scene load_steps=9 format=4 uid="uid://cuoragdsy6aol"]
 
 [ext_resource type="Texture2D" uid="uid://b0e0gt0xtgnt2" path="res://assets/map-parts/walls/Free Pixel Art Forest/Preview/Background.png" id="1_2x5qe"]
 [ext_resource type="Texture2D" uid="uid://n7lf0vgr0y84" path="res://assets/map-parts/walls/long path.png" id="2_if17c"]
 [ext_resource type="PackedScene" uid="uid://pucw1kgckbjk" path="res://scene/character.tscn" id="3_nluny"]
 [ext_resource type="PackedScene" uid="uid://cbkk2502ca4eb" path="res://scene/enemy.tscn" id="4_exgou"]
 [ext_resource type="Script" uid="uid://bc4fp58gvrpqr" path="res://scripts/game_manager.gd" id="5_sryp2"]
-[ext_resource type="PackedScene" path="res://scene/spike.tscn" id="6_n8ki6"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnfv4"]
 texture = ExtResource("1_2x5qe")
@@ -3413,6 +3412,3 @@ text = "GAME OVER"
 
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("5_sryp2")
-
-[node name="Spike" parent="." instance=ExtResource("6_n8ki6")]
-position = Vector2(783, -58)

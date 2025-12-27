@@ -255,13 +255,13 @@ func attack_behavior(delta: float) -> void:
 		enemy_attack_area.scale.x = -1 if direction_to_player < 0 else 1
 	
 	# Saldırı
-	if collision_damage_cooldown <= 0.0 and not is_attacking:
-		perform_attack()
-	elif collision_damage_cooldown > 0.0 and not is_attacking:
-		# Cooldown aktif - idle'da bekle
-		if animated_sprite.sprite_frames.has_animation("enemy_idle"):
-			if animated_sprite.animation != "enemy_idle":
-				animated_sprite.play("enemy_idle")
+	if not is_attacking:
+		if collision_damage_cooldown <= 0.0:
+			perform_attack()
+		else:
+			# Cooldown aktif, saldırı yapamıyoruz - CHASE'e dön
+			print("▶ ATTACK → CHASE (cooldown aktif: ", collision_damage_cooldown, ")")
+			change_state(State.CHASE)
 
 func perform_attack() -> void:
 	print("═══ ENEMY SALDIRI BAŞLIYOR ═══")
@@ -480,7 +480,7 @@ func freeze() -> void:
 	velocity = Vector2.ZERO
 	is_attacking = false
 	deactivate_enemy_attack()
-	
+
 	# Animasyonu idle'a çevir (deferred kullan - signal içinde olabilir)
 	if animated_sprite.sprite_frames.has_animation("enemy_idle"):
 		print("    ✓ Enemy idle'a geçiyor...")
@@ -492,3 +492,19 @@ func freeze() -> void:
 		# enemy_idle yoksa pause yap
 		print("    ⚠ enemy_idle yok, pause yapılıyor")
 		animated_sprite.pause()
+
+func unfreeze() -> void:
+	print("  → Enemy unfreeze() çağrıldı")
+	is_frozen = false
+
+	# Normal davranışa dön
+	if player != null:
+		var distance_to_player = global_position.distance_to(player.global_position)
+		if distance_to_player <= DETECTION_RADIUS:
+			change_state(State.CHASE)
+		else:
+			change_state(State.PATROL)
+	else:
+		change_state(State.PATROL)
+
+	print("    ✓ Enemy çözüldü, state: ", State.keys()[current_state])
