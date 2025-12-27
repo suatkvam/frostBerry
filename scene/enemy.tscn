@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://cdy6xm008exna"]
+[gd_scene load_steps=12 format=3 uid="uid://cbkk2502ca4eb"]
 
 [ext_resource type="Script" uid="uid://cmfh2nhqg0746" path="res://scripts/enemy.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dn8yte3gjqp8w" path="res://assets/character/Fullmain.png" id="1_sprite"]
+[ext_resource type="Script" uid="uid://bv64cqt34nko2" path="res://scripts/health_component.gd" id="3_8u16h"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_idle"]
 atlas = ExtResource("1_sprite")
@@ -59,7 +60,7 @@ height = 26.0
 radius = 200.0
 
 [node name="Enemy" type="CharacterBody2D"]
-collision_layer = 4
+collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_script")
 
@@ -76,3 +77,9 @@ collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
 shape = SubResource("CircleShape2D_detection")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3_8u16h")
+max_health = 10
+current_health = 10
+metadata/_custom_type_script = "uid://bv64cqt34nko2"

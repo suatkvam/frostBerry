@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://b0e0gt0xtgnt2" path="res://assets/map-parts/walls/Free Pixel Art Forest/Preview/Background.png" id="1_2x5qe"]
 [ext_resource type="Texture2D" uid="uid://n7lf0vgr0y84" path="res://assets/map-parts/walls/long path.png" id="2_if17c"]
 [ext_resource type="PackedScene" uid="uid://pucw1kgckbjk" path="res://scene/character.tscn" id="3_nluny"]
-[ext_resource type="PackedScene" path="res://scene/enemy.tscn" id="4_exgou"]
+[ext_resource type="PackedScene" uid="uid://cbkk2502ca4eb" path="res://scene/enemy.tscn" id="4_exgou"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnfv4"]
 texture = ExtResource("1_2x5qe")
@@ -3407,4 +3407,4 @@ zoom = Vector2(4.5, 4.5)
 position_smoothing_enabled = true
 
 [node name="Enemy" parent="." instance=ExtResource("4_exgou")]
-position = Vector2(520, -81)
+position = Vector2(286, -74)

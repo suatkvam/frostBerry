@@ -1,7 +1,8 @@
-[gd_scene load_steps=43 format=3 uid="uid://pucw1kgckbjk"]
+[gd_scene load_steps=44 format=3 uid="uid://pucw1kgckbjk"]
 
 [ext_resource type="Texture2D" uid="uid://dn8yte3gjqp8w" path="res://assets/character/Fullmain.png" id="1_3x35j"]
 [ext_resource type="Script" uid="uid://culdt0pl1js76" path="res://scripts/character.gd" id="1_k8rrn"]
+[ext_resource type="Script" uid="uid://bv64cqt34nko2" path="res://scripts/health_component.gd" id="3_d7vt2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d7vt2"]
 atlas = ExtResource("1_3x35j")
@@ -303,6 +304,7 @@ height = 26.0
 size = Vector2(16, 3)
 
 [node name="Character" type="CharacterBody2D"]
+collision_mask = 3
 script = ExtResource("1_k8rrn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -313,10 +315,16 @@ animation = &"light_attack1.2"
 shape = SubResource("CapsuleShape2D_3x35j")
 
 [node name="AttackArea" type="Area2D" parent="."]
+collision_layer = 6
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
-position = Vector2(-17, 1)
+position = Vector2(17, 2)
 shape = SubResource("RectangleShape2D_k8rrn")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3_d7vt2")
+metadata/_custom_type_script = "uid://bv64cqt34nko2"
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="frame_changed" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_frame_changed"]
