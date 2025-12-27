@@ -26,6 +26,7 @@ var collision_damage_cooldown: float = 0.0  # Cooldown for collision damage
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var detection_area: Area2D = $DetectionArea
+@onready var attack_sound: AudioStreamPlayer2D = $AttackSound
 
 
 func _ready() -> void:
@@ -245,4 +246,5 @@ func check_collision_damage() -> void:
 				if collider.has_method("take_damage"):
 					collider.take_damage(ATTACK_DAMAGE)
 					collision_damage_cooldown = ATTACK_COOLDOWN
+					attack_sound.play()
 					print("ENEMY: Collision damage! Player hit by physical contact")

@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://cdy6xm008exna"]
+[gd_scene load_steps=12 format=3 uid="uid://cdy6xm008exna"]
 
 [ext_resource type="Script" uid="uid://cmfh2nhqg0746" path="res://scripts/enemy.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dn8yte3gjqp8w" path="res://assets/character/Fullmain.png" id="1_sprite"]
+[ext_resource type="AudioStream" path="res://assets/audio/enemy/attack.wav" id="3_attack"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_idle"]
 atlas = ExtResource("1_sprite")
@@ -76,3 +77,6 @@ collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
 shape = SubResource("CircleShape2D_detection")
+
+[node name="AttackSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_attack")

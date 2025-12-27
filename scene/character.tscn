@@ -1,8 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://pucw1kgckbjk"]
+[gd_scene load_steps=15 format=3 uid="uid://pucw1kgckbjk"]
 
 [ext_resource type="Texture2D" uid="uid://dn8yte3gjqp8w" path="res://assets/character/Fullmain.png" id="1_3x35j"]
 [ext_resource type="Script" uid="uid://culdt0pl1js76" path="res://scripts/character.gd" id="1_k8rrn"]
 [ext_resource type="Script" path="res://scripts/health_component.gd" id="2_health"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/jump.wav" id="3_jump"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/landing.wav" id="4_landing"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/hurt.wav" id="5_hurt"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/death.wav" id="6_death"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k8rrn"]
 atlas = ExtResource("1_3x35j")
@@ -72,3 +76,15 @@ shape = SubResource("CapsuleShape2D_3x35j")
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("2_health")
 max_health = 3
+
+[node name="JumpSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_jump")
+
+[node name="LandingSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_landing")
+
+[node name="HurtSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_hurt")
+
+[node name="DeathSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_death")
