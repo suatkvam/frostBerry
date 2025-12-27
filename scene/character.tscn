@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://pucw1kgckbjk"]
+[gd_scene load_steps=11 format=3 uid="uid://pucw1kgckbjk"]
 
 [ext_resource type="Texture2D" uid="uid://dn8yte3gjqp8w" path="res://assets/character/Fullmain.png" id="1_3x35j"]
 [ext_resource type="Script" uid="uid://culdt0pl1js76" path="res://scripts/character.gd" id="1_k8rrn"]
+[ext_resource type="Script" path="res://scripts/health_component.gd" id="2_health"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k8rrn"]
 atlas = ExtResource("1_3x35j")
@@ -56,6 +57,8 @@ radius = 6.0
 height = 26.0
 
 [node name="Character" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 7
 script = ExtResource("1_k8rrn")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -65,3 +68,7 @@ frame_progress = 0.21451537
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_3x35j")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 3

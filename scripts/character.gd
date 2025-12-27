@@ -5,6 +5,13 @@ const SPEED = 300.0
 const JUMP_VELOCITY = -400.0
 
 
+@onready var health_component: HealthComponent = $HealthComponent
+
+
+func _ready() -> void:
+	health_component.died.connect(_on_death)
+
+
 func _physics_process(delta: float) -> void:
 	# Add the gravity.
 	if not is_on_floor():
@@ -23,3 +30,12 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
 	move_and_slide()
+
+
+func take_damage(amount: int) -> void:
+	health_component.take_damage(amount)
+
+
+func _on_death() -> void:
+	set_physics_process(false)
+	# TODO: Add death animation or game over screen
