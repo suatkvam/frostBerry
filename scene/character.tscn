@@ -1,10 +1,14 @@
-[gd_scene load_steps=51 format=3 uid="uid://pucw1kgckbjk"]
+[gd_scene load_steps=55 format=3 uid="uid://pucw1kgckbjk"]
 
 [ext_resource type="Texture2D" uid="uid://dn8yte3gjqp8w" path="res://assets/character/Fullmain.png" id="1_3x35j"]
 [ext_resource type="Script" uid="uid://culdt0pl1js76" path="res://scripts/character.gd" id="1_k8rrn"]
 [ext_resource type="Texture2D" uid="uid://bqeesryni0ivn" path="res://assets/character/main2.1.png" id="2_6k5wm"]
 [ext_resource type="Script" uid="uid://bv64cqt34nko2" path="res://scripts/health_component.gd" id="3_d7vt2"]
 [ext_resource type="Script" uid="uid://dds4fqmp41mgw" path="res://scripts/hurtbox_component.gd" id="5_7v2w7"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/jump.wav" id="6_jump"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/landing.wav" id="7_landing"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/hurt.wav" id="8_hurt"]
+[ext_resource type="AudioStream" path="res://assets/audio/player/death.wav" id="9_death"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ii2y5"]
 atlas = ExtResource("2_6k5wm")
@@ -379,6 +383,18 @@ position_smoothing_speed = 2.0
 
 [node name="HurtboxComponent" type="Node" parent="."]
 script = ExtResource("5_7v2w7")
+
+[node name="JumpSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_jump")
+
+[node name="LandingSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("7_landing")
+
+[node name="HurtSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_hurt")
+
+[node name="DeathSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("9_death")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="frame_changed" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_frame_changed"]

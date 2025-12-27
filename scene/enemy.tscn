@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3 uid="uid://cbkk2502ca4eb"]
+[gd_scene load_steps=51 format=3 uid="uid://cbkk2502ca4eb"]
 
 [ext_resource type="Script" uid="uid://c3eq4d57tmmj6" path="res://scripts/enemy.gd" id="1_yvcfn"]
 [ext_resource type="Texture2D" uid="uid://bicn1jkp7jpjo" path="res://assets/enemy1/_AttackNoMovement.png" id="2_b7koy"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bv44n732a5or7" path="res://assets/enemy1/_AttackComboNoMovement.png" id="4_vgurf"]
 [ext_resource type="Texture2D" uid="uid://qay5kyv77wed" path="res://assets/enemy1/_Idle.png" id="5_ulb22"]
 [ext_resource type="Script" uid="uid://dds4fqmp41mgw" path="res://scripts/hurtbox_component.gd" id="9_kqmod"]
+[ext_resource type="AudioStream" path="res://assets/audio/enemy/attack.wav" id="10_attack"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ulb22"]
 atlas = ExtResource("2_b7koy")
@@ -332,6 +333,9 @@ shape = SubResource("RectangleShape2D_yvcfn")
 
 [node name="HurtboxComponent" type="Node" parent="."]
 script = ExtResource("9_kqmod")
+
+[node name="AttackSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("10_attack")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="frame_changed" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_frame_changed"]

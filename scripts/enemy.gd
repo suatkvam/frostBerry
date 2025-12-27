@@ -42,6 +42,7 @@ var is_transitioning_to_chase: bool = false  # YENİ: chase transition flag
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var enemy_attack_area: Area2D = $EnemyAttackArea
 @onready var hurtbox: HurtboxComponent = $HurtboxComponent
+@onready var attack_sound: AudioStreamPlayer2D = $AttackSound
 
 func _ready() -> void:
 	add_to_group("enemies")
@@ -388,6 +389,8 @@ func _on_enemy_attack_area_body_entered(body: Node2D) -> void:
 			print("💥 HASAR VERİLİYOR: ", ATTACK_DAMAGE)
 			target_hurtbox.take_damage(ATTACK_DAMAGE, global_position)
 			hit_targets.append(body)
+			if attack_sound:
+				attack_sound.play()
 			print("  ✓ Hasar verildi, cooldown zaten aktif")
 		else:
 			print("✗ HurtboxComponent yok!")

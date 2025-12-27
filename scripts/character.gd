@@ -10,6 +10,12 @@ const HITSTUN_DURATION = 0.8  # Enemy ATTACK_COOLDOWN (1.5s) + buffer (0.3s)
 @onready var attack_area = $AttackArea
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var hurtbox: HurtboxComponent = $HurtboxComponent
+@onready var jump_sound: AudioStreamPlayer2D = $JumpSound
+@onready var landing_sound: AudioStreamPlayer2D = $LandingSound
+@onready var hurt_sound: AudioStreamPlayer2D = $HurtSound
+@onready var death_sound: AudioStreamPlayer2D = $DeathSound
+
+var was_on_floor: bool = false
 
 var is_attacking = false
 var combo_queued = false
@@ -71,33 +77,41 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		velocity = Vector2.ZERO
 		return
-	
+
+	# Landing sesi kontrolü
+	if is_on_floor() and not was_on_floor and landing_sound:
+		landing_sound.play()
+
+	was_on_floor = is_on_floor()
+
 	# Hitstun sayacı
 	if is_in_hitstun:
 		hitstun_timer -= delta
 		if hitstun_timer <= 0:
 			is_in_hitstun = false
 			print("Character hitstun bitti")
-	
+
 	# Hitstun sırasında yerçekimi uygula ama kontrol verme
 	if is_in_hitstun:
 		# Yerçekimi
 		if not is_on_floor():
 			velocity += get_gravity() * delta
-		
+
 		# Sürtünme - yavaşça dur
 		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 3)
-		
+
 		move_and_slide()
 		return
-	
+
 	# Normal yerçekimi
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	
+
 	# Zıplama
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
+		if jump_sound:
+			jump_sound.play()
 	
 	# Saldırı girişi
 	if Input.is_action_just_pressed("attack") and is_on_floor():
@@ -244,7 +258,11 @@ func _on_damage_taken(amount: int) -> void:
 	print("╔═══════════════════════════════════════╗")
 	print("║ PLAYER HASAR ALDI: ", str(amount).pad_zeros(16), " ║")
 	print("╚═══════════════════════════════════════╝")
-	
+
+	# Hasar sesi
+	if hurt_sound:
+		hurt_sound.play()
+
 	# Hasar görsel efekti
 	animated_sprite.modulate = Color(1, 0.3, 0.3)
 	await get_tree().create_timer(0.1).timeout
@@ -254,11 +272,15 @@ func _on_health_component_died() -> void:
 	# ÖNEMLİ: is_dead ve death_flag'i EN BAŞTA set et
 	is_dead = true
 	death_flag = true
-	
+
 	print("╔═══════════════════════════════════════╗")
 	print("║     PLAYER: Ölüm prosedürü başladı  ║")
 	print("╚═══════════════════════════════════════╝")
-	
+
+	# Ölüm sesi
+	if death_sound:
+		death_sound.play()
+
 	# 1. Fizik ve collision temizliği
 	velocity = Vector2.ZERO
 	set_physics_process(false)

@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://qnlh63dnffhm"]
+[gd_scene load_steps=4 format=3 uid="uid://qnlh63dnffhm"]
 
 [ext_resource type="Script" uid="uid://dvccwi7can26k" path="res://scripts/spike.gd" id="1_spike_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/hazards/spike_hit.wav" id="2_spike_sound"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spike"]
 size = Vector2(32, 16)
@@ -16,3 +17,6 @@ shape = SubResource("RectangleShape2D_spike")
 [node name="Polygon2D" type="Polygon2D" parent="."]
 color = Color(0.8, 0.1, 0.1, 1)
 polygon = PackedVector2Array(-16, 8, 0, -8, 16, 8)
+
+[node name="SpikeSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_spike_sound")
