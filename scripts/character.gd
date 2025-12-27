@@ -2,9 +2,9 @@ extends CharacterBody2D
 
 const SPEED = 170.0
 const JUMP_VELOCITY = -250.0
-const KNOCKBACK_FORCE = 75.0  # Geri savurma gücü
-const KNOCKBACK_UP_FORCE = -150.0  # Yukarı savurma
-const HITSTUN_DURATION = 0.4  # Hasar sonrası donma süresi
+const KNOCKBACK_FORCE = 200.0  # Artırıldı - daha belirgin
+const KNOCKBACK_UP_FORCE = -150.0  # Artırıldı
+const HITSTUN_DURATION = 0.5  # Biraz uzatıldı
 
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var attack_area = $AttackArea
@@ -13,7 +13,7 @@ const HITSTUN_DURATION = 0.4  # Hasar sonrası donma süresi
 var is_attacking = false
 var combo_queued = false
 var hit_enemies = []
-var is_in_hitstun = false  # Hasar sonrası kontrol kilidi
+var is_in_hitstun = false
 var hitstun_timer = 0.0
 
 func _ready():
@@ -32,15 +32,23 @@ func _physics_process(delta: float) -> void:
 		hitstun_timer -= delta
 		if hitstun_timer <= 0:
 			is_in_hitstun = false
+			print("Character hitstun bitti")
 	
-	# Yerçekimi
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-	
-	# Hitstun sırasında kontrol yok
+	# Hitstun sırasında yerçekimi uygula ama kontrol verme
 	if is_in_hitstun:
+		# Yerçekimi
+		if not is_on_floor():
+			velocity += get_gravity() * delta
+		
+		# Sürtünme - yavaşça dur
+		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 3)
+		
 		move_and_slide()
 		return
+	
+	# Normal yerçekimi
+	if not is_on_floor():
+		velocity += get_gravity() * delta
 	
 	# Zıplama
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
@@ -94,9 +102,10 @@ func _on_animated_sprite_2d_frame_changed() -> void:
 	var current_anim = animated_sprite.animation
 	var current_frame = animated_sprite.frame
 	
-	# Saldırı animasyonlarında belirli frame'lerde collision'ı aç
+	# light_attack_1: Frame 3 (4. frame)
+	# light_attack_2: Frame 2 (3. frame)
 	if current_anim == "light_attack_1":
-		if current_frame == 2:
+		if current_frame == 3:
 			activate_attack()
 		else:
 			deactivate_attack()
@@ -111,7 +120,7 @@ func _on_animated_sprite_2d_frame_changed() -> void:
 func activate_attack() -> void:
 	if not attack_area.monitoring:
 		attack_area.monitoring = true
-		print("ATTACK_AREA: Aktif edildi!")
+		print("ATTACK_AREA: Aktif edildi! Frame: ", animated_sprite.frame)
 
 func deactivate_attack() -> void:
 	if attack_area.monitoring:
@@ -154,21 +163,25 @@ func _on_attack_area_body_entered(body):
 
 # HASAR SİSTEMİ
 func take_damage(amount: int, attacker_position: Vector2 = global_position) -> void:
-	if is_in_hitstun:  # Zaten hasar alıyorsa tekrar alma
+	if is_in_hitstun:
+		print("Character zaten hitstun'da, hasar ignore")
 		return
 	
 	if health_component:
 		health_component.take_damage(amount)
 	
-	# Knockback uygula
+	# Knockback yönünü hesapla
 	var knockback_dir = sign(global_position.x - attacker_position.x)
 	if knockback_dir == 0:
 		knockback_dir = -1 if animated_sprite.flip_h else 1
 	
+	# Knockback uygula
 	apply_knockback(knockback_dir, KNOCKBACK_FORCE, KNOCKBACK_UP_FORCE)
+	
+	print("Character knockback: direction=", knockback_dir, " force=", KNOCKBACK_FORCE)
 
 func apply_knockback(direction: float, force: float, up_force: float) -> void:
-	# Geri savurma
+	# Velocity'yi direkt set et (move_toward kullanma!)
 	velocity.x = direction * force
 	velocity.y = up_force
 	
@@ -181,6 +194,8 @@ func apply_knockback(direction: float, force: float, up_force: float) -> void:
 		is_attacking = false
 		combo_queued = false
 		deactivate_attack()
+	
+	print("Character: Knockback uygulandı! vx=", velocity.x, " vy=", velocity.y)
 
 func _on_damage_taken(amount: int) -> void:
 	# Hasar görsel efekti

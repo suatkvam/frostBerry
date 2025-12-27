@@ -1,16 +1,17 @@
 extends CharacterBody2D
 
-enum State { PATROL, CHASE, ATTACK, HITSTUN }
+enum State { PATROL, CHASE, ATTACK, HITSTUN, COOLDOWN }
 
 # Constants
-const SPEED = 150.0  # 200'den 150'ye düşürüldü - daha yavaş takip
+const SPEED = 150.0
 const PATROL_RANGE = 150.0
-const DETECTION_RADIUS = 180.0  # 200'den 180'e - daha kısa algılama
-const CHASE_EXTENSION = 150.0  # 200'den 150'ye - daha az uzağa gitme
+const DETECTION_RADIUS = 180.0
+const CHASE_EXTENSION = 150.0
 const ATTACK_DAMAGE = 1
-const ATTACK_COOLDOWN = 1.5  # 1.0'dan 1.5'e - daha az sık saldırı
-const KNOCKBACK_RECOVERY = 0.5  # Knockback sonrası toparlanma süresi
-const CHASE_COOLDOWN = 0.8  # Hasar aldıktan sonra kovalamaya başlamadan önce bekleme
+const ATTACK_COOLDOWN = 1.5
+const KNOCKBACK_RECOVERY = 0.4  # Knockback süresi
+const AFTER_HIT_WAIT = 1.0  # Hasar verdikten sonra bekleme
+const AFTER_DAMAGE_WAIT = 0.8  # Hasar aldıktan sonra bekleme
 
 # State
 var current_state: State = State.PATROL
@@ -23,7 +24,7 @@ var returning_home: bool = false
 var collision_damage_cooldown: float = 0.0
 var is_in_hitstun: bool = false
 var hitstun_timer: float = 0.0
-var chase_cooldown_timer: float = 0.0  # Hasar sonrası kovalama beklemesi
+var cooldown_timer: float = 0.0
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var detection_area: Area2D = $DetectionArea
@@ -41,10 +42,6 @@ func _ready() -> void:
 		health_component.damage_taken.connect(_on_damage_taken)
 
 func _physics_process(delta: float) -> void:
-	# Yerçekimi
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-
 	# Sayaçlar
 	if attack_timer > 0:
 		attack_timer -= delta
@@ -54,11 +51,34 @@ func _physics_process(delta: float) -> void:
 		hitstun_timer -= delta
 		if hitstun_timer <= 0:
 			is_in_hitstun = false
-	if chase_cooldown_timer > 0:
-		chase_cooldown_timer -= delta
+			# Hitstun bitince cooldown'a geç
+			current_state = State.COOLDOWN
+			cooldown_timer = AFTER_DAMAGE_WAIT
+			print("Enemy: Hitstun bitti, cooldown başladı")
+	if cooldown_timer > 0:
+		cooldown_timer -= delta
+		if cooldown_timer <= 0:
+			change_state(State.PATROL)
 
-	# Hitstun sırasında sadece fizik
+	# Hitstun sırasında yerçekimi uygula ama kontrol verme
 	if is_in_hitstun:
+		# Yerçekimi
+		if not is_on_floor():
+			velocity += get_gravity() * delta
+		
+		# Sürtünme
+		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 3)
+		
+		move_and_slide()
+		return
+
+	# Normal yerçekimi
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	# Cooldown sırasında hareketsiz dur
+	if current_state == State.COOLDOWN:
+		velocity.x = move_toward(velocity.x, 0, SPEED * 2)
 		move_and_slide()
 		return
 
@@ -75,7 +95,7 @@ func _physics_process(delta: float) -> void:
 	check_collision_damage()
 
 func patrol_behavior(delta: float) -> void:
-	velocity.x = patrol_direction * SPEED * 0.5  # Patrol'de daha yavaş
+	velocity.x = patrol_direction * SPEED * 0.5
 	var offset_from_spawn = global_position.x - spawn_position.x
 
 	if returning_home:
@@ -90,8 +110,7 @@ func patrol_behavior(delta: float) -> void:
 		patrol_direction = 1
 		flip_sprite()
 
-	# Hasar sonrası cooldown varsa kovalama
-	if player != null and not returning_home and chase_cooldown_timer <= 0:
+	if player != null and not returning_home:
 		var distance_to_player = global_position.distance_to(player.global_position)
 		if distance_to_player <= DETECTION_RADIUS:
 			change_state(State.CHASE)
@@ -110,25 +129,23 @@ func chase_behavior(delta: float) -> void:
 		return
 
 	var distance_to_player = global_position.distance_to(player.global_position)
-	if distance_to_player > DETECTION_RADIUS * 1.2:  # Hysteresis - biraz daha uzakta bırak
+	if distance_to_player > DETECTION_RADIUS * 1.2:
 		change_state(State.PATROL)
 		return
 
 	var direction_to_player = player.global_position.x - global_position.x
 	
-	# Yavaşça yaklaş
 	if abs(direction_to_player) > 5.0:
 		var direction = sign(direction_to_player)
-		velocity.x = direction * SPEED * 0.7  # %70 hızda kovala
+		velocity.x = direction * SPEED * 0.7
 		
 		if abs(direction_to_player) > 15.0:
 			animated_sprite.flip_h = direction < 0
 	else:
 		velocity.x = 0
 
-	# Attack'a geçiş için daha yakın ol
 	var distance_to_player_horiz = abs(direction_to_player)
-	if distance_to_player_horiz < 25.0:  # 20'den 25'e - biraz daha yakın olmalı
+	if distance_to_player_horiz < 25.0:
 		change_state(State.ATTACK)
 
 func attack_behavior(delta: float) -> void:
@@ -139,7 +156,7 @@ func attack_behavior(delta: float) -> void:
 	velocity.x = 0
 
 	var distance_to_player_horiz = abs(player.global_position.x - global_position.x)
-	if distance_to_player_horiz > 40.0:  # 30'dan 40'a - daha geç bırak
+	if distance_to_player_horiz > 40.0:
 		change_state(State.CHASE)
 		return
 
@@ -151,6 +168,7 @@ func change_state(new_state: State) -> void:
 	if current_state == new_state:
 		return
 
+	print("Enemy STATE: ", State.keys()[current_state], " -> ", State.keys()[new_state])
 	current_state = new_state
 
 	match current_state:
@@ -176,7 +194,7 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 			change_state(State.PATROL)
 
 func check_collision_damage() -> void:
-	if is_in_hitstun:  # Hitstun'dayken hasar verme
+	if is_in_hitstun or current_state == State.COOLDOWN:
 		return
 	
 	for i in get_slide_collision_count():
@@ -188,36 +206,49 @@ func check_collision_damage() -> void:
 				if collider.has_method("take_damage"):
 					collider.take_damage(ATTACK_DAMAGE, global_position)
 					collision_damage_cooldown = ATTACK_COOLDOWN
+					
+					# Hasar verdikten sonra geri çekil
+					print("Enemy: Oyuncuya hasar verdi, geri çekiliyor...")
+					var retreat_direction = sign(global_position.x - collider.global_position.x)
+					if retreat_direction == 0:
+						retreat_direction = 1
+					
+					# Geri çekilme velocity'si
+					velocity.x = retreat_direction * SPEED * 1.2
+					
+					# Cooldown'a geç
+					current_state = State.COOLDOWN
+					cooldown_timer = AFTER_HIT_WAIT
 
 # HASAR SİSTEMİ
 func take_damage(amount: int, attacker_position: Vector2 = global_position) -> void:
-	if is_in_hitstun:  # Zaten knockback'te
+	if is_in_hitstun or current_state == State.COOLDOWN:
+		print("Enemy zaten hitstun/cooldown'da, hasar ignore")
 		return
 	
 	if health_component:
 		health_component.take_damage(amount)
 	
-	# Knockback hesapla
+	# Knockback yönünü hesapla
 	var knockback_dir = sign(global_position.x - attacker_position.x)
 	if knockback_dir == 0:
 		knockback_dir = 1
 	
-	apply_knockback(knockback_dir, 75.0, -120.0)  # Daha hafif knockback
+	# Knockback uygula
+	apply_knockback(knockback_dir, 200.0, -150.0)
 	
-	# Hasar sonrası kovalama cooldown'u
-	chase_cooldown_timer = CHASE_COOLDOWN
-	
-	# Patrol'e dön
-	change_state(State.PATROL)
+	print("Enemy knockback: direction=", knockback_dir, " force=200")
 
 func apply_knockback(direction: float, force: float, up_force: float) -> void:
+	# Velocity'yi direkt set et
 	velocity.x = direction * force
 	velocity.y = up_force
 	
 	is_in_hitstun = true
 	hitstun_timer = KNOCKBACK_RECOVERY
+	current_state = State.HITSTUN
 	
-	print("Enemy knockback! Direction: ", direction)
+	print("Enemy: Knockback uygulandı! vx=", velocity.x, " vy=", velocity.y, " hitstun=", KNOCKBACK_RECOVERY, "s")
 
 func _on_damage_taken(amount: int) -> void:
 	# Hasar görsel efekti
@@ -228,13 +259,11 @@ func _on_damage_taken(amount: int) -> void:
 func _on_health_component_died() -> void:
 	print("Enemy öldü! Siliniyor...")
 	
-	# Fizik ve AI durdur
 	set_physics_process(false)
 	velocity = Vector2.ZERO
 	collision_layer = 0
 	collision_mask = 0
 	
-	# Fade out efekti
 	var tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(animated_sprite, "modulate:a", 0.0, 0.5)
