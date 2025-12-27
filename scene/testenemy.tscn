@@ -1,28 +1,39 @@
-[gd_scene load_steps=4 format=3 uid="uid://bjod3e6jj7gpv"]
+[gd_scene load_steps=7 format=3 uid="uid://bjod3e6jj7gpv"]
 
+[ext_resource type="PackedScene" path="res://scene/moving_platform_horizontal.tscn" id="1_5sx3p"]
 [ext_resource type="PackedScene" uid="uid://pucw1kgckbjk" path="res://scene/character.tscn" id="1_character"]
 [ext_resource type="PackedScene" uid="uid://cdy6xm008exna" path="res://scene/enemy.tscn" id="1_itxqv"]
+[ext_resource type="PackedScene" path="res://scene/moving_platform_vertical.tscn" id="2_ansyh"]
+[ext_resource type="PackedScene" uid="uid://qnlh63dnffhm" path="res://scene/spike.tscn" id="3_spike"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
 size = Vector2(1162, 58)
 
 [node name="Main" type="Node2D"]
 
+[node name="MovingPlatformHorizontal" parent="." instance=ExtResource("1_5sx3p")]
+position = Vector2(325, 522)
+
+[node name="MovingPlatformVertical" parent="." instance=ExtResource("2_ansyh")]
+position = Vector2(685, 432)
+
 [node name="Character" parent="." instance=ExtResource("1_character")]
 position = Vector2(200, 550)
 
 [node name="Enemy" parent="." instance=ExtResource("1_itxqv")]
-position = Vector2(469, 311)
+position = Vector2(850, 538)
 
-[node name="StaticBody2D" type="StaticBody2D" parent="."]
-collision_layer = 1
+[node name="Spike" parent="." instance=ExtResource("3_spike")]
+position = Vector2(634, 582)
+
+[node name="Ground" type="StaticBody2D" parent="."]
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
 position = Vector2(581, 623)
 shape = SubResource("RectangleShape2D_ground")
 
-[node name="ColorRect" type="ColorRect" parent="StaticBody2D"]
+[node name="ColorRect" type="ColorRect" parent="Ground"]
 offset_top = 594.0
 offset_right = 1162.0
 offset_bottom = 652.0

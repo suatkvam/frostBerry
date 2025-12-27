@@ -21,6 +21,7 @@ var patrol_direction: int = 1
 var attack_timer: float = 0.0
 var player: CharacterBody2D = null
 var returning_home: bool = false  # True when returning to spawn after long chase
+var collision_damage_cooldown: float = 0.0  # Cooldown for collision damage
 
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -44,6 +45,10 @@ func _physics_process(delta: float) -> void:
 	if attack_timer > 0:
 		attack_timer -= delta
 
+	# Update collision damage cooldown
+	if collision_damage_cooldown > 0:
+		collision_damage_cooldown -= delta
+
 	# State-based behavior
 	match current_state:
 		State.PATROL:
@@ -58,6 +63,9 @@ func _physics_process(delta: float) -> void:
 		print("State: ", State.keys()[current_state], " | Velocity.x: ", velocity.x, " | Player: ", player != null)
 
 	move_and_slide()
+
+	# Check for collision damage with player
+	check_collision_damage()
 
 
 func patrol_behavior(delta: float) -> void:
@@ -224,3 +232,19 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 		player = null
 		if current_state == State.CHASE or current_state == State.ATTACK:
 			change_state(State.PATROL)
+
+
+func check_collision_damage() -> void:
+	# Check if enemy collided with player
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+
+		# Check if it's the player
+		if collider and (collider.name == "Character" or collider.is_in_group("player")):
+			# Deal damage if cooldown is ready
+			if collision_damage_cooldown <= 0.0:
+				if collider.has_method("take_damage"):
+					collider.take_damage(ATTACK_DAMAGE)
+					collision_damage_cooldown = ATTACK_COOLDOWN
+					print("ENEMY: Collision damage! Player hit by physical contact")
