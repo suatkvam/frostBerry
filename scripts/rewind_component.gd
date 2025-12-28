@@ -77,6 +77,11 @@ func _ready() -> void:
 	else:
 		print("⚠ RewindComponent: RewindManager bulunamadı!")
 
+func _exit_tree() -> void:
+	var rewind_manager = get_tree().get_first_node_in_group("rewind_manager")
+	if rewind_manager and rewind_manager.has_method("unregister_rewindable"):
+		rewind_manager.unregister_rewindable(self)
+
 func _find_animated_sprite(node: Node) -> AnimatedSprite2D:
 	if node is AnimatedSprite2D:
 		return node

@@ -82,6 +82,7 @@ func start_rewind() -> void:
 	# Player'ın rewind component'ini bul
 	if not player_rewind_component:
 		for comp in rewindable_objects:
+			if not is_instance_valid(comp): continue
 			if comp.parent_node == player or comp.parent_node.is_in_group("player"):
 				player_rewind_component = comp
 				player = comp.parent_node
@@ -124,7 +125,8 @@ func start_rewind() -> void:
 
 	# 3. Tüm rewindable objelere rewind başlat sinyali gönder
 	for component in rewindable_objects:
-		component.start_rewind(max_rewind_duration)
+		if is_instance_valid(component):
+			component.start_rewind(max_rewind_duration)
 
 func update_rewind(delta: float) -> void:
 	rewind_time += delta
@@ -153,7 +155,7 @@ func update_rewind(delta: float) -> void:
 
 	# Tüm rewindable objelere snapshot uygula
 	for component in rewindable_objects:
-		if component.enabled:
+		if is_instance_valid(component) and component.enabled:
 			component.apply_rewind(rewind_playback_speed, delta)
 
 func stop_rewind() -> void:
@@ -169,7 +171,8 @@ func stop_rewind() -> void:
 
 	# 1. Tüm rewindable objelere rewind durdur sinyali
 	for component in rewindable_objects:
-		component.stop_rewind()
+		if is_instance_valid(component):
+			component.stop_rewind()
 
 	# 2. Dünyayı unfreeze et
 	unfreeze_world()
@@ -189,19 +192,25 @@ func create_player_ghost() -> void:
 			oldest_ghost.queue_free()
 			print("  ► En eski ghost silindi (max: ", max_ghosts, ")")
 
-	# Yeni ghost node oluştur
-	var new_ghost = StaticBody2D.new()
+	# CharacterBody2D kullanıyoruz
+	var new_ghost = CharacterBody2D.new()
 	new_ghost.name = "PlayerGhost_" + str(Time.get_ticks_msec())
+	new_ghost.add_to_group("player") # Player grubuna ekle
+	
+	# Layer 1 ve 2'yi kapsayan Layer 3 (Binary 11)
+	new_ghost.collision_layer = 3 
+	new_ghost.collision_mask = 0
+	
 	new_ghost.global_position = player.global_position
-	new_ghost.collision_layer = 1  # Player ile aynı layer
-	new_ghost.collision_mask = 0   # Hiçbir şeyle çarpışmasın
-
-	# Collision shape kopyala
-	var player_collision = player.get_node_or_null("CollisionShape2D")
-	if player_collision and player_collision.shape:
-		var ghost_collision = CollisionShape2D.new()
-		ghost_collision.shape = player_collision.shape.duplicate()
-		new_ghost.add_child(ghost_collision)
+	
+	# Şekli ve Transformu kopyala
+	var player_coll = player.get_node_or_null("CollisionShape2D")
+	if player_coll and player_coll.shape:
+		var coll_shape = CollisionShape2D.new()
+		coll_shape.name = "CollisionShape2D"
+		coll_shape.shape = player_coll.shape.duplicate()
+		coll_shape.transform = player_coll.transform # ÖNEMLİ: Offset'i kopyala
+		new_ghost.add_child(coll_shape)
 
 	# Sprite kopyala (görsel)
 	var player_sprite = player.get_node_or_null("AnimatedSprite2D")
@@ -217,11 +226,10 @@ func create_player_ghost() -> void:
 
 		new_ghost.add_child(ghost_sprite)
 
-	# Sahneye ekle (player'ın parent'ına ekle)
-	if player.get_parent():
-		player.get_parent().add_child(new_ghost)
-		ghost_nodes.append(new_ghost)  # Array'e ekle
-		print("  ✓ Player ghost oluşturuldu: ", new_ghost.global_position, " (", ghost_nodes.size(), "/", max_ghosts, ")")
+	# Sahneye güvenli ekle
+	player.get_parent().call_deferred("add_child", new_ghost)
+	ghost_nodes.append(new_ghost)  # Array'e ekle
+	print("  ✓ Player ghost oluşturuldu: ", new_ghost.global_position, " (", ghost_nodes.size(), "/", max_ghosts, ")")
 
 # Dünyayı dondur
 func freeze_world() -> void:
