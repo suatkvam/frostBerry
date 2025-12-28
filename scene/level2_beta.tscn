@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=4 uid="uid://jye2g82suc0b"]
+[gd_scene load_steps=21 format=4 uid="uid://jye2g82suc0b"]
 
 [ext_resource type="Texture2D" uid="uid://dbujt5giyt5wj" path="res://assets/spike2.png" id="1_uoba7"]
 [ext_resource type="Texture2D" uid="uid://87nuq8a24ewb" path="res://assets/white.png" id="2_kdopt"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://scene/collectable.tscn" id="14_asjmc"]
 [ext_resource type="PackedScene" uid="uid://bn4wh0hntnmoq" path="res://scene/inviwall.tscn" id="14_xsib0"]
 [ext_resource type="PackedScene" uid="uid://c8gem18sid2mw" path="res://scene/door.tscn" id="15_asjmc"]
+[ext_resource type="PackedScene" path="res://scene/finish.tscn" id="16_okgxv"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvwit"]
 texture = ExtResource("1_uoba7")
@@ -17718,7 +17719,7 @@ tile_map_data = PackedByteArray("AAAAAMP/AgAAAAAAAAAAAMT/AgAAAAEAAAAAAMX/AgAAAAI
 tile_set = SubResource("TileSet_el4px")
 
 [node name="Character" parent="." instance=ExtResource("3_p8sh5")]
-position = Vector2(2132, -277)
+position = Vector2(100, -260)
 
 [node name="AllSpikes" type="Node2D" parent="."]
 position = Vector2(629, -240)
@@ -17933,9 +17934,6 @@ position = Vector2(2550, -450)
 [node name="Door" parent="." instance=ExtResource("15_asjmc")]
 position = Vector2(2550, -265)
 
-[node name="Enemy2" parent="." instance=ExtResource("8_el4px")]
-position = Vector2(2432, -269)
-
 [node name="Enemy3" parent="." instance=ExtResource("8_el4px")]
 position = Vector2(2170, -269)
 
@@ -17963,30 +17961,31 @@ target_platform = NodePath("../MovingPlatformVertical2")
 position = Vector2(2865, -442)
 
 [node name="FloatingPlatform6" parent="." instance=ExtResource("9_wajh4")]
-position = Vector2(2896, -315)
+position = Vector2(2950, -315)
 
 [node name="FloatingPlatform7" parent="." instance=ExtResource("9_wajh4")]
-position = Vector2(3017, -296)
+position = Vector2(3071, -294)
 
 [node name="FloatingPlatform8" parent="." instance=ExtResource("9_wajh4")]
-position = Vector2(3060, -350)
+position = Vector2(3116, -346)
 
 [node name="FloatingPlatform9" parent="." instance=ExtResource("9_wajh4")]
-position = Vector2(3018, -400)
+position = Vector2(3058, -379)
 
 [node name="MovingPlatformHorizontal2" parent="." instance=ExtResource("6_aj1f2")]
-position = Vector2(3314, -350)
+position = Vector2(3307, -346)
 scale = Vector2(0.4, 0.4)
+move_distance = 100.0
 speed = 50.0
 wait_time = 0.5
 
 [node name="PressurePlate5" parent="." node_paths=PackedStringArray("target_platform") instance=ExtResource("7_el4px")]
-position = Vector2(3018, -407)
+position = Vector2(3057, -387)
 scale = Vector2(0.2, 0.2)
 target_platform = NodePath("../MovingPlatformHorizontal2")
 
 [node name="FloatingPlatform10" parent="." instance=ExtResource("9_wajh4")]
-position = Vector2(3396, -349)
+position = Vector2(3396, -341)
 
-[node name="FloatingPlatform11" parent="." instance=ExtResource("9_wajh4")]
-position = Vector2(3484, -271)
+[node name="Finish" parent="." instance=ExtResource("16_okgxv")]
+position = Vector2(3625, -277)
