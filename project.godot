@@ -14,11 +14,11 @@ config/name="new_frostBerry"
 run/main_scene="uid://b8x8k5j4y2q1"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
-<<<<<<<HEADrun/main_scene="uid://bypubyi1ond24"
 
 [autoload]
 
 RewindManager="*res://scripts/rewind_manager.gd"
+GameManager="*res://scripts/game_manager.gd"
 
 [input]
 

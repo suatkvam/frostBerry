@@ -227,33 +227,26 @@ func create_player_ghost() -> void:
 
 		new_ghost.add_child(ghost_sprite)
 
-<<<<<<< Updated upstream
 	# Sahneye güvenli ekle
 	player.get_parent().call_deferred("add_child", new_ghost)
 	ghost_nodes.append(new_ghost)  # Array'e ekle
-	print("  ✓ Player ghost oluşturuldu: ", new_ghost.global_position, " (", ghost_nodes.size(), "/", max_ghosts, ")")
-=======
-	# Sahneye ekle (player'ın parent'ına ekle)
-	if player.get_parent():
-		player.get_parent().add_child(new_ghost)
-		ghost_nodes.append(new_ghost)  # Array'e ekle
 
-		# Ghost duration - otomatik silinme timer'ı
-		if ghost_duration > 0:
-			var timer = Timer.new()
-			timer.wait_time = ghost_duration
-			timer.one_shot = true
-			timer.timeout.connect(func():
-				if new_ghost and is_instance_valid(new_ghost):
-					ghost_nodes.erase(new_ghost)  # Array'den çıkar
-					new_ghost.queue_free()  # Sil
-					print("  ✗ Ghost yaşam süresi doldu, silindi (", ghost_duration, "s)")
-			)
-			new_ghost.add_child(timer)
-			timer.start()
+	# Ghost duration - otomatik silinme timer'ı
+	if ghost_duration > 0:
+		var timer = Timer.new()
+		timer.wait_time = ghost_duration
+		timer.one_shot = true
+		timer.autostart = true # Sahneye girince otomatik başlasın
+		timer.timeout.connect(func():
+			if new_ghost and is_instance_valid(new_ghost):
+				ghost_nodes.erase(new_ghost)  # Array'den çıkar
+				new_ghost.queue_free()  # Sil
+				print("  ✗ Ghost yaşam süresi doldu, silindi (", ghost_duration, "s)")
+		)
+		new_ghost.add_child(timer)
 
-		print("  ✓ Player ghost oluşturuldu: ", new_ghost.global_position, " (", ghost_nodes.size(), "/", max_ghosts, ", duration: ", ghost_duration, "s)")
->>>>>>> Stashed changes
+	print("  ✓ Player ghost oluşturuldu: ", new_ghost.global_position, " (", ghost_nodes.size(), "/", max_ghosts, ", duration: ", ghost_duration, "s)")
+
 
 # Dünyayı dondur
 func freeze_world() -> void:

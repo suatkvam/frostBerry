@@ -290,7 +290,7 @@ func _on_health_component_died() -> void:
 	
 	# 5. Animasyon bitti, artık GameManager devreye girecek
 	print("  ► death_flag=true ile GameManager'a bildiriliyor")
-	# GameManager zaten HealthComponent.died sinyalini dinliyor
+	GameManager.player_died()
 
 func get_death_flag() -> bool:
 	return death_flag
