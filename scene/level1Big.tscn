@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=4 uid="uid://cuoragdsy6aol"]
+[gd_scene load_steps=11 format=4 uid="uid://cuoragdsy6aol"]
 
 [ext_resource type="Texture2D" uid="uid://b0e0gt0xtgnt2" path="res://assets/map-parts/walls/Free Pixel Art Forest/Preview/Background.png" id="1_2x5qe"]
 [ext_resource type="Texture2D" uid="uid://n7lf0vgr0y84" path="res://assets/map-parts/walls/long path.png" id="2_if17c"]
 [ext_resource type="PackedScene" uid="uid://pucw1kgckbjk" path="res://scene/character.tscn" id="3_nluny"]
 [ext_resource type="PackedScene" uid="uid://cbkk2502ca4eb" path="res://scene/enemy.tscn" id="4_exgou"]
 [ext_resource type="Script" uid="uid://bc4fp58gvrpqr" path="res://scripts/game_manager.gd" id="5_sryp2"]
+[ext_resource type="Script" uid="uid://b454833x1utjt" path="res://scripts/RewindEnergyBar.gd" id="6_n8ki6"]
+[ext_resource type="Script" uid="uid://cr5yn85q7hydc" path="res://scripts/health_bar.gd" id="7_5gfsq"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnfv4"]
 texture = ExtResource("1_2x5qe")
@@ -3400,7 +3402,7 @@ tile_map_data = PackedByteArray("AAAAAM//AAAAAAAAAAAAAND/AAAAAAEAAAAAANH/AAAAAAI
 tile_set = SubResource("TileSet_kj7ci")
 
 [node name="Enemy" parent="." instance=ExtResource("4_exgou")]
-position = Vector2(1191, -135)
+position = Vector2(574, -89)
 
 [node name="Character" parent="." instance=ExtResource("3_nluny")]
 position = Vector2(331, -78)
@@ -3412,3 +3414,35 @@ text = "GAME OVER"
 
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("5_sryp2")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="RewindEnergyBar" type="ProgressBar" parent="CanvasLayer"]
+custom_minimum_size = Vector2(200, 30)
+offset_left = 20.0
+offset_top = 60.0
+offset_right = 220.0
+offset_bottom = 90.0
+max_value = 4.0
+show_percentage = false
+script = ExtResource("6_n8ki6")
+player_path = NodePath("../../Character")
+
+[node name="Label" type="Label" parent="CanvasLayer/RewindEnergyBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="HealthBar" type="ProgressBar" parent="CanvasLayer"]
+custom_minimum_size = Vector2(200, 30)
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 122.0
+offset_bottom = 47.0
+script = ExtResource("7_5gfsq")
+player_path = NodePath("../../Character")
+
+[node name="Label" type="Label" parent="CanvasLayer/HealthBar"]
+layout_mode = 0
+offset_right = 101.0
+offset_bottom = 27.0

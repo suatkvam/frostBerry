@@ -28,6 +28,7 @@ var ghost_node: Node2D = null  # Player'ın bıraktığı gölge
 var rewindable_objects: Array[RewindComponent] = []
 var player: CharacterBody2D = null
 var player_rewind_component: RewindComponent = null
+var player_energy_component: RewindEnergyComponent = null
 
 # Frozen objeler
 var frozen_enemies: Array = []
@@ -85,8 +86,19 @@ func start_rewind() -> void:
 				print("  ✓ Player RewindComponent bulundu!")
 				break
 
+	# Energy component'i bul
+	if not player_energy_component and player:
+		if player.has_node("RewindEnergyComponent"):
+			player_energy_component = player.get_node("RewindEnergyComponent")
+			print("  ✓ Player RewindEnergyComponent bulundu!")
+
 	if not player or not player_rewind_component:
 		print("⚠ RewindManager: Player veya RewindComponent yok!")
+		return
+
+	# ENERJİ KONTROLÜ - Enerji yoksa rewind başlatma!
+	if player_energy_component and not player_energy_component.has_energy():
+		print("⚠ RewindManager: Rewind enerjisi yok! (0/", player_energy_component.max_energy, "s)")
 		return
 
 	# Player'ın history'si var mı kontrol et
@@ -114,6 +126,16 @@ func start_rewind() -> void:
 
 func update_rewind(delta: float) -> void:
 	rewind_time += delta
+
+	# ENERJİ TÜKETİMİ - Shift basılıyken her frame enerji azalır
+	if player_energy_component:
+		player_energy_component.consume_energy(delta)
+
+		# Enerji bitti mi? Otomatik durdur!
+		if not player_energy_component.has_energy():
+			print("  ⚠ Rewind enerjisi tükendi!")
+			stop_rewind()
+			return
 
 	# Maksimum süreyi aştı mı?
 	if rewind_time >= max_rewind_duration:
