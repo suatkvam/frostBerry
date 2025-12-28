@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=4 uid="uid://dkc3nnjcumbgi"]
+[gd_scene load_steps=18 format=4 uid="uid://dkc3nnjcumbgi"]
 
 [ext_resource type="Texture2D" uid="uid://dbujt5giyt5wj" path="res://assets/spike2.png" id="1_uoba7"]
 [ext_resource type="Texture2D" uid="uid://87nuq8a24ewb" path="res://assets/white.png" id="2_kdopt"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scene/moving_platform_vertical.tscn" id="10_kkgw3"]
 [ext_resource type="Script" uid="uid://b454833x1utjt" path="res://scripts/RewindEnergyBar.gd" id="11_o8lxi"]
 [ext_resource type="Script" uid="uid://cr5yn85q7hydc" path="res://scripts/health_bar.gd" id="12_ctjnt"]
+[ext_resource type="PackedScene" uid="uid://dqwpwlx07prv6" path="res://scene/collectable.tscn" id="14_asjmc"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gvwit"]
 texture = ExtResource("1_uoba7")
@@ -17833,3 +17834,9 @@ player_path = NodePath("../../Character")
 layout_mode = 0
 offset_right = 101.0
 offset_bottom = 27.0
+
+[node name="Collectable" parent="." instance=ExtResource("14_asjmc")]
+position = Vector2(929, -332)
+
+[node name="Collectable2" parent="." instance=ExtResource("14_asjmc")]
+position = Vector2(1701, -360)

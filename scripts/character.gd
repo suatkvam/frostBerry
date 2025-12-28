@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
-const SPEED = 250.0
-const JUMP_VELOCITY = -400.0
+const SPEED = 170.0
+const JUMP_VELOCITY = -310.0
 const KNOCKBACK_FORCE = 200.0
 const KNOCKBACK_UP_FORCE = -150.0
 const HITSTUN_DURATION = 0.8  # Enemy ATTACK_COOLDOWN (1.5s) + buffer (0.3s)
