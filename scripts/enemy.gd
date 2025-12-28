@@ -26,6 +26,8 @@ var chase_start_position: Vector2
 var patrol_direction: int = 1
 var attack_timer: float = 0.0
 var player: CharacterBody2D = null
+var target: Node2D = null  # Saldırı hedefi (ghost veya player)
+var detected_bodies: Array[Node2D] = []  # Detection area'daki tüm body'ler
 var returning_home: bool = false
 var collision_damage_cooldown: float = 0.0
 var is_in_hitstun: bool = false
@@ -90,6 +92,50 @@ func _ready() -> void:
 	else:
 		print("Enemy: HurtboxComponent BULUNAMADI!")
 
+# En iyi hedefi bul: Ghost > Player
+func find_best_target() -> Node2D:
+	var ghosts: Array[Node2D] = []
+	var players: Array[Node2D] = []
+
+	# Detected bodies'leri kategorize et
+	for body in detected_bodies:
+		if not is_instance_valid(body):
+			continue
+
+		# Ghost'ları önceliklendir
+		if body.is_in_group("ghost"):
+			ghosts.append(body)
+		elif body.is_in_group("player") or body.name == "Character":
+			players.append(body)
+
+	# Ghost varsa en yakın ghost'u döndür
+	if ghosts.size() > 0:
+		var closest_ghost: Node2D = null
+		var min_distance: float = INF
+
+		for ghost in ghosts:
+			var distance = global_position.distance_to(ghost.global_position)
+			if distance < min_distance:
+				min_distance = distance
+				closest_ghost = ghost
+
+		return closest_ghost
+
+	# Ghost yoksa en yakın player'ı döndür
+	if players.size() > 0:
+		var closest_player: Node2D = null
+		var min_distance: float = INF
+
+		for p in players:
+			var distance = global_position.distance_to(p.global_position)
+			if distance < min_distance:
+				min_distance = distance
+				closest_player = p
+
+		return closest_player
+
+	return null
+
 func _physics_process(delta: float) -> void:
 	if is_dead or is_frozen:
 		return
@@ -106,10 +152,11 @@ func _physics_process(delta: float) -> void:
 	if cooldown_timer > 0:
 		cooldown_timer -= delta
 		if cooldown_timer <= 0:
-			# Cooldown bitti - player hala yakınsa CHASE, değilse PATROL
-			if player != null:
-				var distance_to_player = global_position.distance_to(player.global_position)
-				if distance_to_player <= DETECTION_RADIUS:
+			# Cooldown bitti - target yeniden bul ve yakınsa CHASE
+			target = find_best_target()
+			if target != null:
+				var distance_to_target = global_position.distance_to(target.global_position)
+				if distance_to_target <= DETECTION_RADIUS:
 					change_state(State.CHASE)
 				else:
 					change_state(State.PATROL)
@@ -163,7 +210,7 @@ func patrol_behavior(delta: float) -> void:
 	if is_transitioning_to_chase:
 		velocity.x = 0  # Dur
 		return
-	
+
 	velocity.x = patrol_direction * SPEED * 0.5
 	var offset_from_spawn = global_position.x - spawn_position.x
 
@@ -180,13 +227,15 @@ func patrol_behavior(delta: float) -> void:
 		patrol_direction = 1
 		flip_sprite()
 
-	if player != null and not returning_home:
-		var distance_to_player = global_position.distance_to(player.global_position)
-		if distance_to_player <= DETECTION_RADIUS:
+	# Target varsa (ghost veya player) ve eve dönmüyorsa chase başlat
+	if target != null and not returning_home:
+		var distance_to_target = global_position.distance_to(target.global_position)
+		if distance_to_target <= DETECTION_RADIUS:
 			change_state(State.CHASE)
 
 func chase_behavior(delta: float) -> void:
-	if player == null:
+	# Target yoksa PATROL'e dön
+	if target == null:
 		change_state(State.PATROL)
 		return
 
@@ -200,60 +249,62 @@ func chase_behavior(delta: float) -> void:
 		change_state(State.PATROL)
 		return
 
-	var distance_to_player = global_position.distance_to(player.global_position)
-	if distance_to_player > DETECTION_RADIUS * 1.2:
+	var distance_to_target = global_position.distance_to(target.global_position)
+	if distance_to_target > DETECTION_RADIUS * 1.2:
 		change_state(State.PATROL)
 		return
 
-	var direction_to_player = player.global_position.x - global_position.x
-	
-	if abs(direction_to_player) > 5.0:
-		var direction = sign(direction_to_player)
+	var direction_to_target = target.global_position.x - global_position.x
+
+	if abs(direction_to_target) > 5.0:
+		var direction = sign(direction_to_target)
 		velocity.x = direction * SPEED * 0.7
-		
-		if abs(direction_to_player) > 15.0:
+
+		if abs(direction_to_target) > 15.0:
 			animated_sprite.flip_h = direction < 0
 			if enemy_attack_area:
 				enemy_attack_area.scale.x = -1 if direction < 0 else 1
 	else:
 		velocity.x = 0
 
-	var distance_to_player_horiz = abs(direction_to_player)
-	if distance_to_player_horiz < 80.0:  # 60 → 80 (daha uzaktan saldır)
-		print("▶ CHASE → ATTACK (mesafe: ", distance_to_player_horiz, ")")
+	var distance_to_target_horiz = abs(direction_to_target)
+	if distance_to_target_horiz < 80.0:  # 60 → 80 (daha uzakdan saldır)
+		var target_type = "Ghost" if target.is_in_group("ghost") else "Player"
+		print("▶ CHASE → ATTACK (hedef: ", target_type, ", mesafe: ", distance_to_target_horiz, ")")
 		change_state(State.ATTACK)
 
 func attack_behavior(delta: float) -> void:
-	# Player yoksa PATROL'e dön
-	if player == null:
+	# Target yoksa PATROL'e dön
+	if target == null:
 		change_state(State.PATROL)
 		return
-	
-	# Player öldüyse idle'a geç ve bekle
-	if player.has_method("is_alive") and not player.is_alive():
-		velocity.x = 0
-		if animated_sprite.sprite_frames.has_animation("enemy_idle"):
-			if animated_sprite.animation != "enemy_idle":
-				animated_sprite.play("enemy_idle")
-		return
-	
-	# DEBUG: Her frame yazdırma, sadece state değişiminde
-	# print("● ATTACK BEHAVIOR çalışıyor, mesafe: ", abs(player.global_position.x - global_position.x))
+
+	# Target öldüyse yeni hedef bul
+	if target.has_method("is_alive") and not target.is_alive():
+		# Yeni hedef ara
+		target = find_best_target()
+		if target == null:
+			# Hedef kalmadı, idle'a geç
+			velocity.x = 0
+			if animated_sprite.sprite_frames.has_animation("enemy_idle"):
+				if animated_sprite.animation != "enemy_idle":
+					animated_sprite.play("enemy_idle")
+			return
 
 	velocity.x = 0
 
-	var distance_to_player_horiz = abs(player.global_position.x - global_position.x)
-	if distance_to_player_horiz > 100.0:  # 80 → 100 (daha geç bırak)
-		print("▶ ATTACK → CHASE (çok uzak: ", distance_to_player_horiz, ")")
+	var distance_to_target_horiz = abs(target.global_position.x - global_position.x)
+	if distance_to_target_horiz > 100.0:  # 80 → 100 (daha geç bırak)
+		print("▶ ATTACK → CHASE (çok uzak: ", distance_to_target_horiz, ")")
 		change_state(State.CHASE)
 		return
 
-	# Player'a bak
-	var direction_to_player = player.global_position.x - global_position.x
-	animated_sprite.flip_h = direction_to_player < 0
+	# Target'a bak
+	var direction_to_target = target.global_position.x - global_position.x
+	animated_sprite.flip_h = direction_to_target < 0
 	if enemy_attack_area:
-		enemy_attack_area.scale.x = -1 if direction_to_player < 0 else 1
-	
+		enemy_attack_area.scale.x = -1 if direction_to_target < 0 else 1
+
 	# Saldırı
 	if not is_attacking:
 		if collision_damage_cooldown <= 0.0:
@@ -317,35 +368,64 @@ func flip_sprite() -> void:
 		enemy_attack_area.scale.x = -1 if patrol_direction < 0 else 1
 
 func _on_detection_area_body_entered(body: Node2D) -> void:
-	if body.is_in_group("player") or body.name == "Character":
-		player = body
-		print("► Player algılandı: ", body.name)
-		
-		# YENİ: Transition flag'i set et
-		is_transitioning_to_chase = true
-		
-		# Player görüldüğünde idle'a geç
-		if animated_sprite.sprite_frames.has_animation("enemy_idle"):
-			animated_sprite.play("enemy_idle")
-			# 0.3 saniye idle bekle, sonra chase başlat
-			await get_tree().create_timer(0.3).timeout
-			
-			# YENİ: Transition flag'i kapat
-			is_transitioning_to_chase = false
-			
-			if player != null and current_state == State.PATROL:
-				change_state(State.CHASE)
+	# Ghost veya player mı kontrol et
+	if body.is_in_group("ghost") or body.is_in_group("player") or body.name == "Character":
+		# Array'e ekle
+		if body not in detected_bodies:
+			detected_bodies.append(body)
+
+		# Player referansını güncelle (backwards compatibility)
+		if body.is_in_group("player") or body.name == "Character":
+			if not body.is_in_group("ghost"):  # Gerçek player
+				player = body
+
+		# En iyi hedefi bul (ghost > player)
+		var old_target = target
+		target = find_best_target()
+
+		if target:
+			var target_type = "Ghost" if target.is_in_group("ghost") else "Player"
+			print("► ", target_type, " algılandı: ", target.name)
+
+			# YENİ: Transition flag'i set et
+			is_transitioning_to_chase = true
+
+			# Target görüldüğünde idle'a geç
+			if animated_sprite.sprite_frames.has_animation("enemy_idle"):
+				animated_sprite.play("enemy_idle")
+				# 0.3 saniye idle bekle, sonra chase başlat
+				await get_tree().create_timer(0.3).timeout
+
+				# YENİ: Transition flag'i kapat
+				is_transitioning_to_chase = false
+
+				if target != null and current_state == State.PATROL:
+					change_state(State.CHASE)
 
 func _on_detection_area_body_exited(body: Node2D) -> void:
+	# Array'den çıkar
+	if body in detected_bodies:
+		detected_bodies.erase(body)
+
+	# Player referansını güncelle
 	if body == player:
-		# Player öldüyse state değiştirme
-		if player.has_method("is_alive") and not player.is_alive():
-			print("► Player öldü, state değişmiyor")
-			return
-		
 		player = null
-		if current_state == State.CHASE or current_state == State.ATTACK:
-			change_state(State.PATROL)
+
+	# En iyi hedefi yeniden bul
+	var old_target = target
+	target = find_best_target()
+
+	# Hedef değiştiyse veya hedef kalmadıysa
+	if old_target == body:
+		if target == null:
+			# Hedef kalmadı - PATROL'e dön
+			print("► Hedef kaybedildi")
+			if current_state == State.CHASE or current_state == State.ATTACK:
+				change_state(State.PATROL)
+		else:
+			# Yeni hedef var (ghost öldü, player kaldı gibi)
+			var new_target_type = "Ghost" if target.is_in_group("ghost") else "Player"
+			print("► Hedef değişti: ", new_target_type)
 
 func _on_frame_changed() -> void:
 	if is_dead:
@@ -376,16 +456,18 @@ func _on_enemy_attack_area_body_entered(body: Node2D) -> void:
 	print("║ ATTACK AREA: Body girdi!  ║")
 	print("║ Body: ", body.name, " ║")
 	print("╚═══════════════════════════╝")
-	
+
 	if body in hit_targets:
 		print("⚠ Zaten vuruldu!")
 		return
-	
-	if body.is_in_group("player") or body.name == "Character":
+
+	# Ghost veya Player'a hasar ver
+	if body.is_in_group("ghost") or body.is_in_group("player") or body.name == "Character":
 		# HurtboxComponent üzerinden hasar ver
 		if body.has_node("HurtboxComponent"):
 			var target_hurtbox = body.get_node("HurtboxComponent")
-			print("💥 HASAR VERİLİYOR: ", ATTACK_DAMAGE)
+			var body_type = "Ghost" if body.is_in_group("ghost") else "Player"
+			print("💥 ", body_type, "'a HASAR VERİLİYOR: ", ATTACK_DAMAGE)
 			target_hurtbox.take_damage(ATTACK_DAMAGE, global_position)
 			hit_targets.append(body)
 			print("  ✓ Hasar verildi, cooldown zaten aktif")
@@ -497,10 +579,11 @@ func unfreeze() -> void:
 	print("  → Enemy unfreeze() çağrıldı")
 	is_frozen = false
 
-	# Normal davranışa dön
-	if player != null:
-		var distance_to_player = global_position.distance_to(player.global_position)
-		if distance_to_player <= DETECTION_RADIUS:
+	# Normal davranışa dön - hedef yeniden bul
+	target = find_best_target()
+	if target != null:
+		var distance_to_target = global_position.distance_to(target.global_position)
+		if distance_to_target <= DETECTION_RADIUS:
 			change_state(State.CHASE)
 		else:
 			change_state(State.PATROL)

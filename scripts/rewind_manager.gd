@@ -21,6 +21,7 @@ signal rewind_stopped()
 @export var max_ghosts: int = 3  # Maksimum ghost sayısı
 @export var rewind_playback_speed: float = 1.0  # Rewind oynatma hızı (1.0 = normal, 2.0 = 2x hızlı)
 @export var ghost_duration: float = 4.0  # Ghost'ların yaşam süresi (saniye, 0 = sınırsız)
+@export var ghost_health: float = 1.0  # Ghost'ların can miktarı (1 = tek vuruşta ölür)
 
 # State
 var is_rewinding: bool = false
@@ -197,11 +198,12 @@ func create_player_ghost() -> void:
 	var new_ghost = CharacterBody2D.new()
 	new_ghost.name = "PlayerGhost_" + str(Time.get_ticks_msec())
 	new_ghost.add_to_group("player") # Player grubuna ekle
-	
+	new_ghost.add_to_group("ghost") # Ghost grubuna da ekle (enemy detection için)
+
 	# Layer 1 ve 2'yi kapsayan Layer 3 (Binary 11)
-	new_ghost.collision_layer = 3 
+	new_ghost.collision_layer = 3
 	new_ghost.collision_mask = 0
-	
+
 	new_ghost.global_position = player.global_position
 	
 	# Şekli ve Transformu kopyala
@@ -226,6 +228,28 @@ func create_player_ghost() -> void:
 		ghost_sprite.modulate = ghost_color
 
 		new_ghost.add_child(ghost_sprite)
+
+	# HealthComponent ekle (ghost can sistemi)
+	var health_comp = HealthComponent.new()
+	health_comp.name = "HealthComponent"
+	health_comp.max_health = int(ghost_health)
+	health_comp.current_health = int(ghost_health)
+	new_ghost.add_child(health_comp)
+
+	# HurtboxComponent ekle (ghost hasar alabilir)
+	var hurtbox_comp = HurtboxComponent.new()
+	hurtbox_comp.name = "HurtboxComponent"
+	hurtbox_comp.health_component_path = NodePath("../HealthComponent")
+	hurtbox_comp.can_be_knocked_back = false  # Ghost knockback almaz
+	new_ghost.add_child(hurtbox_comp)
+
+	# Ghost öldüğünde sil
+	health_comp.died.connect(func():
+		if new_ghost and is_instance_valid(new_ghost):
+			ghost_nodes.erase(new_ghost)
+			new_ghost.queue_free()
+			print("  ✗ Ghost öldürüldü!")
+	)
 
 	# Sahneye güvenli ekle
 	player.get_parent().call_deferred("add_child", new_ghost)
