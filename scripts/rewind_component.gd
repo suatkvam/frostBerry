@@ -44,6 +44,7 @@ var state_history: Array[StateSnapshot] = []
 var max_snapshots: int = 300  # 5 saniye * 60 FPS
 var record_timer: float = 0.0
 var is_rewinding: bool = false
+var rewind_accumulator: float = 0.0  # Rewind hızı için accumulator
 
 # Parent referansları
 var parent_node: Node2D
@@ -155,10 +156,15 @@ func start_rewind(rewind_duration: float) -> void:
 func apply_rewind(playback_speed: float, delta: float) -> void:
 	if state_history.is_empty():
 		return
-	
-	# Son snapshot'ı uygula ve sil
-	var snapshot = state_history.pop_back()
-	apply_snapshot(snapshot)
+
+	# Rewind hızı ile accumulator artır
+	rewind_accumulator += playback_speed * delta
+
+	# record_interval'e göre snapshot pop et (60 FPS → 0.016s)
+	while rewind_accumulator >= record_interval and not state_history.is_empty():
+		var snapshot = state_history.pop_back()
+		apply_snapshot(snapshot)
+		rewind_accumulator -= record_interval
 
 # Snapshot'ı uygula
 func apply_snapshot(snapshot: StateSnapshot) -> void:
@@ -196,6 +202,7 @@ func apply_custom_data(data: Dictionary) -> void:
 # Rewind bitir (RewindManager tarafından çağrılır)
 func stop_rewind() -> void:
 	is_rewinding = false
+	rewind_accumulator = 0.0  # Accumulator'ı sıfırla
 	rewind_finished.emit()
 	print("▶ REWIND BİTTİ: ", parent_node.name)
 

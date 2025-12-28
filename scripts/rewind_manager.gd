@@ -18,11 +18,13 @@ signal rewind_stopped()
 @export var rewind_input_action: String = "rewind"  # Input action name
 @export var ghost_opacity: float = 0.5  # Gölge opaklığı
 @export var ghost_color: Color = Color(0.5, 0.5, 1.0, 0.5)  # Mavi tonlu gölge
+@export var max_ghosts: int = 3  # Maksimum ghost sayısı
+@export var rewind_playback_speed: float = 1.0  # Rewind oynatma hızı (1.0 = normal, 2.0 = 2x hızlı)
 
 # State
 var is_rewinding: bool = false
 var rewind_time: float = 0.0
-var ghost_node: Node2D = null  # Player'ın bıraktığı gölge
+var ghost_nodes: Array[Node2D] = []  # Player'ın bıraktığı gölgeler (max 3)
 
 # Kayıtlı component'ler
 var rewindable_objects: Array[RewindComponent] = []
@@ -152,7 +154,7 @@ func update_rewind(delta: float) -> void:
 	# Tüm rewindable objelere snapshot uygula
 	for component in rewindable_objects:
 		if component.enabled:
-			component.apply_rewind(1.0, delta)
+			component.apply_rewind(rewind_playback_speed, delta)
 
 func stop_rewind() -> void:
 	if not is_rewinding:
@@ -180,23 +182,26 @@ func create_player_ghost() -> void:
 	if not player:
 		return
 
-	# Önceki ghost varsa sil (aslında silmeyelim, çoklu ghost olabilir)
-	# if ghost_node:
-	# 	ghost_node.queue_free()
+	# Maksimum ghost sayısı kontrolü - 3'ten fazlaysa en eskisini sil
+	if ghost_nodes.size() >= max_ghosts:
+		var oldest_ghost = ghost_nodes.pop_front()  # En eski ghost'u çıkar
+		if oldest_ghost and is_instance_valid(oldest_ghost):
+			oldest_ghost.queue_free()
+			print("  ► En eski ghost silindi (max: ", max_ghosts, ")")
 
 	# Yeni ghost node oluştur
-	ghost_node = StaticBody2D.new()
-	ghost_node.name = "PlayerGhost_" + str(Time.get_ticks_msec())
-	ghost_node.global_position = player.global_position
-	ghost_node.collision_layer = 1  # Player ile aynı layer
-	ghost_node.collision_mask = 0   # Hiçbir şeyle충돌 etmesin
+	var new_ghost = StaticBody2D.new()
+	new_ghost.name = "PlayerGhost_" + str(Time.get_ticks_msec())
+	new_ghost.global_position = player.global_position
+	new_ghost.collision_layer = 1  # Player ile aynı layer
+	new_ghost.collision_mask = 0   # Hiçbir şeyle çarpışmasın
 
 	# Collision shape kopyala
 	var player_collision = player.get_node_or_null("CollisionShape2D")
 	if player_collision and player_collision.shape:
 		var ghost_collision = CollisionShape2D.new()
 		ghost_collision.shape = player_collision.shape.duplicate()
-		ghost_node.add_child(ghost_collision)
+		new_ghost.add_child(ghost_collision)
 
 	# Sprite kopyala (görsel)
 	var player_sprite = player.get_node_or_null("AnimatedSprite2D")
@@ -210,12 +215,13 @@ func create_player_ghost() -> void:
 		# Yarı saydam mavi renk
 		ghost_sprite.modulate = ghost_color
 
-		ghost_node.add_child(ghost_sprite)
+		new_ghost.add_child(ghost_sprite)
 
 	# Sahneye ekle (player'ın parent'ına ekle)
 	if player.get_parent():
-		player.get_parent().add_child(ghost_node)
-		print("  ✓ Player ghost oluşturuldu: ", ghost_node.global_position)
+		player.get_parent().add_child(new_ghost)
+		ghost_nodes.append(new_ghost)  # Array'e ekle
+		print("  ✓ Player ghost oluşturuldu: ", new_ghost.global_position, " (", ghost_nodes.size(), "/", max_ghosts, ")")
 
 # Dünyayı dondur
 func freeze_world() -> void:

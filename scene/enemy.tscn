@@ -317,6 +317,8 @@ shape = SubResource("CircleShape2D_detection")
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("3_8u16h")
+max_health = 30
+current_health = 30
 metadata/_custom_type_script = "uid://bv64cqt34nko2"
 
 [node name="EnemyAttackArea" type="Area2D" parent="."]
