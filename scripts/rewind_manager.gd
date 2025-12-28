@@ -20,7 +20,7 @@ signal rewind_stopped()
 @export var ghost_color: Color = Color(0.5, 0.5, 1.0, 0.5)  # Mavi tonlu gölge
 @export var max_ghosts: int = 3  # Maksimum ghost sayısı
 @export var rewind_playback_speed: float = 1.0  # Rewind oynatma hızı (1.0 = normal, 2.0 = 2x hızlı)
-@export var ghost_duration: float = 4.0  # Ghost'ların yaşam süresi (saniye, 0 = sınırsız)
+@export var ghost_duration: float = 8.0  # Ghost'ların yaşam süresi (saniye, 0 = sınırsız)
 @export var ghost_health: float = 1.0  # Ghost'ların can miktarı (1 = tek vuruşta ölür)
 
 # State

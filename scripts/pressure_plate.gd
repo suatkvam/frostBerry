@@ -1,6 +1,6 @@
 extends Node2D
 
-@export var target_platform: AnimatableBody2D
+@export var target_platform: Node
 @onready var sprite = $Sprite2D
 @onready var area = $Area2D
 

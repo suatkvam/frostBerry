@@ -48,12 +48,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "New Game"
 
-[node name="LoadGameButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 70)
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "Load Game"
-
 [node name="ExitButton" type="Button" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 70)
 layout_mode = 2
@@ -61,5 +55,4 @@ theme_override_font_sizes/font_size = 32
 text = "Exit"
 
 [connection signal="pressed" from="CenterContainer/VBoxContainer/NewGameButton" to="." method="_on_new_game_button_pressed"]
-[connection signal="pressed" from="CenterContainer/VBoxContainer/LoadGameButton" to="." method="_on_load_game_button_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/ExitButton" to="." method="_on_exit_button_pressed"]

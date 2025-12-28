@@ -1,7 +1,6 @@
 extends Control
 
 var resume_button
-var new_game_button
 var quit_button
 
 func _ready():
@@ -12,7 +11,6 @@ func _ready():
 	
 	# Try to find nodes using unique names first (fastest)
 	resume_button = get_node_or_null("%ResumeButton")
-	new_game_button = get_node_or_null("%NewGameButton")
 	quit_button = get_node_or_null("%QuitButton")
 	
 	# Fallback: Find by name recursively if unique access fails
@@ -20,18 +18,13 @@ func _ready():
 		print("WARNING: %ResumeButton not found. Searching children recursively...")
 		resume_button = find_child("ResumeButton", true, false)
 	
-	if not new_game_button:
-		print("WARNING: %NewGameButton not found. Searching children recursively...")
-		new_game_button = find_child("NewGameButton", true, false)
-		
 	if not quit_button:
 		print("WARNING: %QuitButton not found. Searching children recursively...")
 		quit_button = find_child("QuitButton", true, false)
 		
 	# Connect signals if found, else dump tree
-	if resume_button and new_game_button and quit_button:
+	if resume_button and quit_button:
 		resume_button.pressed.connect(_on_resume_button_pressed)
-		new_game_button.pressed.connect(_on_new_game_button_pressed)
 		quit_button.pressed.connect(_on_quit_button_pressed)
 		print("MainMenu initialized successfully.")
 	else:
@@ -51,10 +44,6 @@ func _resume_game():
 
 func _on_resume_button_pressed():
 	_resume_game()
-
-func _on_new_game_button_pressed():
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scene/level1.tscn")
 
 func _on_quit_button_pressed():
 	# Unpause before leaving the scene, otherwise the new scene might start paused

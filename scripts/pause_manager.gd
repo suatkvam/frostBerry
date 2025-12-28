@@ -3,7 +3,10 @@ extends Node
 var menu_scene = preload("res://scene/main_menu.tscn")
 var menu_instance = null
 
-func _unhandled_input(event):
+func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+func _input(event):
 	if event.is_action_pressed("ui_cancel"):
 		if get_tree().paused:
 			# This is handled by the menu itself now
