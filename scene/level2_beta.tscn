@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://dbujt5giyt5wj" path="res://assets/spike2.png" id="1_uoba7"]
 [ext_resource type="Texture2D" uid="uid://87nuq8a24ewb" path="res://assets/white.png" id="2_kdopt"]
-[ext_resource type="Texture2D" uid="uid://dknv036y7kbgm" path="res://assets/Main.png" id="3_gvwit"]
+[ext_resource type="Texture2D" uid="uid://dknv036y7kbgm" path="res://assets/main.png" id="3_gvwit"]
 [ext_resource type="PackedScene" uid="uid://pucw1kgckbjk" path="res://scene/character.tscn" id="3_p8sh5"]
 [ext_resource type="PackedScene" uid="uid://qnlh63dnffhm" path="res://scene/spike.tscn" id="5_p8sh5"]
 [ext_resource type="PackedScene" path="res://scene/moving_platform_horizontal.tscn" id="6_aj1f2"]
@@ -17721,41 +17721,42 @@ zoom = Vector2(6, 6)
 position = Vector2(629, -240)
 
 [node name="Spike" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(32, 0)
+position = Vector2(30, 10)
 
 [node name="Spike2" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
+position = Vector2(0, 10)
 
 [node name="Spike3" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(111, 2)
+position = Vector2(60, 10)
 
 [node name="Spike4" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(379, 0)
+position = Vector2(380, 10)
 
 [node name="Spike5" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(412, 0)
+position = Vector2(410, 10)
 
 [node name="Spike6" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(445, -1)
+position = Vector2(440, 10)
 
 [node name="Spike7" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(479, 0)
+position = Vector2(470, 10)
 
 [node name="Spike8" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(513, 0)
+position = Vector2(500, 10)
 
 [node name="Spike9" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(547, 0)
+position = Vector2(530, 10)
 
 [node name="Spike10" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(579, 0)
+position = Vector2(560, 10)
 
 [node name="Spike11" parent="AllSpikes" instance=ExtResource("5_p8sh5")]
-position = Vector2(613, 0)
+position = Vector2(590, 10)
 
 [node name="MovingPlatformHorizontal" parent="." instance=ExtResource("6_aj1f2")]
 position = Vector2(1126, -311)
 scale = Vector2(0.4, 0.4)
-move_distance = 60.0
+move_distance = 120.0
 speed = 50.0
 
 [node name="PressurePlate" parent="." node_paths=PackedStringArray("target_platform") instance=ExtResource("7_el4px")]
