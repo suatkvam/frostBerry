@@ -48,8 +48,8 @@ func show_game_over() -> void:
 	
 	# Reset state
 	is_game_over = false
-	
-	# Ana menüye dön
-	print("  ✓ Ana menüye dönülüyor...")
+
+	# Death scene'i yükle
+	print("  ✓ Death scene yükleniyor...")
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scene/title_screen.tscn")
+	get_tree().change_scene_to_file("res://scene/death_scene.tscn")

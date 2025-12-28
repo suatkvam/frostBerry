@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=4 uid="uid://cuoragdsy6aol"]
+[gd_scene load_steps=13 format=4 uid="uid://cuoragdsy6aol"]
 
 [ext_resource type="Texture2D" uid="uid://b0e0gt0xtgnt2" path="res://assets/map-parts/walls/Free Pixel Art Forest/Preview/Background.png" id="1_2x5qe"]
 [ext_resource type="Texture2D" uid="uid://n7lf0vgr0y84" path="res://assets/map-parts/walls/long path.png" id="2_if17c"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://b454833x1utjt" path="res://scripts/RewindEnergyBar.gd" id="6_n8ki6"]
 [ext_resource type="Script" uid="uid://cr5yn85q7hydc" path="res://scripts/health_bar.gd" id="7_5gfsq"]
 [ext_resource type="PackedScene" uid="uid://dqwpwlx07prv6" path="res://scene/collectable.tscn" id="7_p7gso"]
+[ext_resource type="PackedScene" uid="uid://dp0cprb8vviks" path="res://scene/finish.tscn" id="9_h8gxk"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lnfv4"]
 texture = ExtResource("1_2x5qe")
@@ -3450,3 +3451,6 @@ offset_bottom = 27.0
 
 [node name="Collectable" parent="." instance=ExtResource("7_p7gso")]
 position = Vector2(389, -61)
+
+[node name="Finish" parent="." instance=ExtResource("9_h8gxk")]
+position = Vector2(443.00006, -71)
