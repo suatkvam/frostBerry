@@ -1,6 +1,6 @@
 # FrostBerry
 
-A 2D platformer game created for **SNOWBERRYGAMEJAM** (December 26-28, 2024)
+A 2D platformer game created for **SNOWBERRYGAMEJAM** (December 26-28, 2025)
 
 ## About
 
@@ -16,7 +16,7 @@ FrostBerry is a platformer game built around the theme of **"Rewind"**. Navigate
 ## Game Jam
 
 - **Event**: SNOWBERRYGAMEJAM
-- **Duration**: 3 days (December 26-28, 2024)
+- **Duration**: 3 days (December 26-28, 2025)
 - **Theme**: Rewind
 
 ## Team & Credits
@@ -25,7 +25,7 @@ FrostBerry is a platformer game built around the theme of **"Rewind"**. Navigate
 - **Hüdayi**: Enemy AI, Music & Sound Effects
 - **Verda & Buğra**: Pixel Art & Visuals
 - **Yakup**: Spike Mechanics & Level Design
-- **Kerem**: Support & General Assistance
+- **Keremalp**: Support & General Assistance
 
 ## Development
 
